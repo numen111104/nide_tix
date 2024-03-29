@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:nide_tix/shared/const.dart';
 import 'package:nide_tix/widgets/destinations_card.dart';
@@ -22,7 +24,9 @@ class _DestinationPageState extends State<DestinationPage> {
   }
 
   Future<DestinationsModel> fetchDestinations() async {
-    final response = await http.get(Uri.parse('${baseUrl}destinasi'));
+    final response = !Platform.isWindows
+        ? await http.get(Uri.parse('${baseUrl}destinasi'))
+        : await http.get(Uri.parse('${windowsApi}destinasi'));
     if (response.statusCode == 200) {
       return DestinationsModel.fromMap(jsonDecode(response.body));
     } else {
@@ -36,7 +40,7 @@ class _DestinationPageState extends State<DestinationPage> {
       appBar: AppBar(
         title: const Text('Destinations'),
         leading: IconButton(
-          icon: Icon(Icons.arrow_back_outlined),
+          icon: const Icon(Icons.arrow_back_outlined),
           onPressed: () {
             Navigator.of(context).pop();
           },
@@ -46,7 +50,7 @@ class _DestinationPageState extends State<DestinationPage> {
         future: futureDestinations,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
+            return const Center(child: CircularProgressIndicator());
           } else if (snapshot.hasError) {
             return Center(child: Text('Error: ${snapshot.error}'));
           } else {
@@ -56,10 +60,10 @@ class _DestinationPageState extends State<DestinationPage> {
                 final destination = snapshot.data!.data[index];
                 return TourismCard(
                   key: ValueKey(destination.id),
-                  imageUrl: !destination.imageAsset.startsWith(apiUrl)
+                  imageUrl: Platform.isAndroid ? !destination.imageAsset.startsWith(apiUrl)
                       ? destination.imageAsset
                       : destination.imageAsset = destination.imageAsset
-                          .replaceFirst(apiUrl, 'http://10.0.2.2:8000'),
+                          .replaceFirst(apiUrl, 'http://10.0.2.2:8000') : destination.imageAsset,
                   name: destination.name,
                   location: destination.location,
                   onTap: () {
