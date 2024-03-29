@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:fancy_shimmer_image/fancy_shimmer_image.dart';
 import 'package:flutter/material.dart';
@@ -27,12 +28,14 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<HomeImageAssets> fetchImagesHome() async {
-    final response = await http.get(Uri.parse('${baseUrl}home-images'));
+    final response = !Platform.isWindows
+        ? await http.get(Uri.parse('${baseUrl}home-images'))
+        : await http.get(Uri.parse('${windowsApi}home-images'));
     if (response.statusCode == 200) {
       Map<String, dynamic> json = jsonDecode(response.body);
       return HomeImageAssets.fromMap(json);
     } else {
-      throw Exception('Failed to load destinations');
+      throw Exception('Failed to load destinations, status code: ${response.statusCode}');
     }
   }
 
@@ -226,4 +229,6 @@ class _HomePageState extends State<HomePage> {
           ],
         ),
       );
+
+       
 }

@@ -37,7 +37,7 @@ class Datum {
     final String openDays;
     final String openTime;
     final int ticketPrice;
-    late final String imageAsset;
+     String imageAsset;
     final List<String> imageUrls;
 
     Datum({
